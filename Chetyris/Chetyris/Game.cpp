@@ -28,7 +28,7 @@ const int NEXT_PIECE_X = 16;
 const int NEXT_PIECE_Y = 4;
 
 Game::Game(int width, int height)
- : m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1)
+ : m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1), m_well(width, height)
 {
 }
 
@@ -51,7 +51,7 @@ void Game::play()
     waitForEnter();
 }
 
-void Game::displayPrompt(std::string s)     
+void Game::displayPrompt(const std::string s)     
 {
     m_screen.gotoXY(PROMPT_X, PROMPT_Y);
     m_screen.printStringClearLine(s);   // overwrites previous text
@@ -60,6 +60,20 @@ void Game::displayPrompt(std::string s)
 
 void Game::displayStatus()
 {
+	m_screen.gotoXY(SCORE_X, SCORE_Y);
+	m_screen.printString("Score:     ");
+	m_screen.gotoXY(SCORE_X + 17, SCORE_Y);
+	m_screen.printChar('0'); //TEMPORARY PLACEHOLDER
+	
+	m_screen.gotoXY(ROWS_LEFT_X, ROWS_LEFT_Y);
+	m_screen.printString("Rows Left: ");
+	m_screen.gotoXY(ROWS_LEFT_X + 17, ROWS_LEFT_Y);
+	m_screen.printChar('5'); //TEMPORARY PLACEHOLDER
+
+	m_screen.gotoXY(LEVEL_X, LEVEL_Y);	
+	m_screen.printString("Level:     ");
+	m_screen.gotoXY(LEVEL_X + 17, LEVEL_Y);
+	m_screen.printChar('1'); //TEMPORARY PLACEHOLDER, CHANGE TO 1
     // [Replace this with code to display the status.]
 }
 

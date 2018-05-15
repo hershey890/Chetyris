@@ -12,7 +12,7 @@ class Game
     Game(int width, int height);
     void play();
     bool playOneLevel();
-    void displayPrompt(std::string s);
+    void displayPrompt(const std::string s);
     void displayStatus();
     // [Add other members as necessary.]
 

@@ -18,6 +18,19 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Chetyris\Game.h" />
+    <ClInclude Include="Chetyris\Piece.h" />
+    <ClInclude Include="Chetyris\UserInterface.h" />
+    <ClInclude Include="Chetyris\Well.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Chetyris\chetyris.cpp" />
+    <ClCompile Include="Chetyris\Game.cpp" />
+    <ClCompile Include="Chetyris\Piece.cpp" />
+    <ClCompile Include="Chetyris\UserInterfaceWindows.cpp" />
+    <ClCompile Include="Chetyris\Well.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D8103060-86FB-4FB4-B312-FE4FBA0C52BE}</ProjectGuid>
@@ -43,7 +56,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -146,19 +159,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Chetyris.cpp" />
-    <ClCompile Include="Game.cpp" />
-    <ClCompile Include="Piece.cpp" />
-    <ClCompile Include="UserInterfaceWindows.cpp" />
-    <ClCompile Include="Well.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="Piece.h" />
-    <ClInclude Include="UserInterface.h" />
-    <ClInclude Include="Well.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
