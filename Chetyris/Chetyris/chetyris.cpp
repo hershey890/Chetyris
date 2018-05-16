@@ -1,5 +1,4 @@
 #include "Game.h"
-
 const int WELL_WIDTH  = 10;
 const int WELL_HEIGHT = 18;
 

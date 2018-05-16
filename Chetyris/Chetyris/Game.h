@@ -3,6 +3,7 @@
 
 #include "Well.h"
 #include "UserInterface.h"
+#include "Piece.h"
 #include <string>
 // [Add other #include directives as necessary.]
 
@@ -15,11 +16,16 @@ class Game
     void displayPrompt(const std::string s);
     void displayStatus();
     // [Add other members as necessary.]
-
+	
   private:
     Well    m_well;
     Screen  m_screen;
     int     m_level;
+	void printPiece(Well well, Piece piece, int x, int y);
+	void erasePiece(Well well, Piece piece, int x, int y);
+	bool canTurn(Well well, Piece piece, int x, int y);
+	bool canDrop(Well well);
+
     // [Add other members as necessary.]
 };
 

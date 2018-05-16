@@ -60,16 +60,19 @@ void Game::displayPrompt(const std::string s)
 
 void Game::displayStatus()
 {
+	/*SCORE*/
 	m_screen.gotoXY(SCORE_X, SCORE_Y);
 	m_screen.printString("Score:     ");
 	m_screen.gotoXY(SCORE_X + 17, SCORE_Y);
 	m_screen.printChar('0'); //TEMPORARY PLACEHOLDER
 	
+	/*ROWS LEFT*/
 	m_screen.gotoXY(ROWS_LEFT_X, ROWS_LEFT_Y);
 	m_screen.printString("Rows Left: ");
 	m_screen.gotoXY(ROWS_LEFT_X + 17, ROWS_LEFT_Y);
 	m_screen.printChar('5'); //TEMPORARY PLACEHOLDER
 
+	/*LEVEL*/
 	m_screen.gotoXY(LEVEL_X, LEVEL_Y);	
 	m_screen.printString("Level:     ");
 	m_screen.gotoXY(LEVEL_X + 17, LEVEL_Y);
@@ -79,5 +82,66 @@ void Game::displayStatus()
 
 bool Game::playOneLevel()
 {
+	Piece piece(chooseRandomPieceType());
+	Well well;
+	Timer t;
+	Timer s;
+	s.start();
+	t.start();
+
+	int y = 0;
+	while (s.elapsed() < 20000) { /*ARBRITRARY NUMBER, CHANGE TO STOP WHEN WELL FILLS OR
+								 5 ROWS HAVE BEEN DESTROYED*/
+		//printPiece(piece, 4, y);
+		//if (t.elapsed() >= 1000) { //T = maximum(1000-(100*(L-1)), 100)
+		if (t.elapsed() >= 250) { //T = maximum(1000-(100*(L-1)), 100)
+			if (!canDrop(well))
+				break;
+			erasePiece(well, piece, 4, y);
+			y++;
+			printPiece(well, piece, 4, y);
+			t.start();
+		}
+		well.print_well_arr(well);
+	}
     return false;  // [Replace this with the code to play a level.]
 }
+
+void Game::printPiece(Well well, Piece piece, int x, int y) {
+	for (int i = 0; i < 16; i++) {
+		int p = i % 4 + 1;
+		int q = i / 4;
+		m_screen.gotoXY(x + p - 1, q + y);
+		if (*(piece.get_piece(1) + i) == '#') {
+			m_screen.printChar(*(piece.get_piece(1) + i));
+			well.set_well(*(piece.get_piece(1) + i), x + p - 1, q + y);
+		}
+	}
+}
+
+void Game::erasePiece(Well well, Piece piece, int x, int y) {
+	for (int i = 0; i < 16; i++) {
+		int p = i % 4 + 1;
+		int q = i / 4;
+		m_screen.gotoXY(x + p - 1, q + y);
+		if (*(piece.get_piece(1) + i) == '#') {//!= ' ') {
+			m_screen.printChar(' ');
+			well.set_well(' ', x + p - 1, q + y);
+		}
+	}
+}
+
+bool Game::canTurn(Well well, Piece piece, int x, int y) {
+	return false;
+}
+
+bool Game::canDrop(Well well) {
+	for (int i = 1; i < well.get_sizeX() - 1; i++) {
+		for (int j = 0; j < well.get_sizeY(); j++) {
+			if (well.get_well(i, j) == '#' && (well.get_well(i, j + 1) == '@' || well.get_well(i, j + 1) == '$'))
+				return false;
+		}
+	}
+	return true;
+}
+
