@@ -15,10 +15,15 @@ public:
 
 	/*returns the pointer for the first char in a char array for the
 	pieces*/
-	char* get_piece(const int& orientation);
+	char* get_piece();
+	int increment_orientation();
+	int decrement_orientation();
+	int get_orientation() const;
 
 private:
 	PieceType m_piece_type;
+
+	int m_orientation;
 
 	char m_piece_I_1[16] { ' ', ' ', ' ', ' ', '#', '#', '#', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
 	char m_piece_I_2[16] { ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ' };

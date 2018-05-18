@@ -12,11 +12,11 @@ public:
 
 	/*A copy constructor is used to initialize a previously uninitialized 
 	object from some other object's data.*/
-	Well(const Well& old_well);
+	//Well(const Well& old_well);
 
 	/*An assignment operator is used to replace the data of a previously 
 	initialized object with some other object's data.*/
-	Well& operator=(const Well& old_well);
+	//Well& operator=(const Well& old_well);
 
 	~Well();
 	void display(Screen& screen, int x, int y);
@@ -28,7 +28,6 @@ private:
 	int m_well_size_x;
 	int m_well_size_y;
 	std::vector<std::vector<char> > m_well;
-	std::vector<std::vector<char> > m_well_bounding_box;
 };
 
 #endif // WELL_INCLUDED

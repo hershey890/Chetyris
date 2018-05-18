@@ -129,7 +129,7 @@ bool Game::playOneLevel()
 			break;
 		}
 		else if (key_press == '8') { //up key
-
+			rotatePiece(piece, x_pos, y_pos);
 		}
 	}
 
@@ -141,15 +141,10 @@ void Game::printPiece(Piece piece, const int& x, const int& y) {
 		int p = i % 4;
 		int q = i / 4;
 		m_screen.gotoXY(x + p, q + y);
-		/*if (*(piece.get_piece(1) + i) == '#' && m_well.set_well(*(piece.get_piece(1) + i), x + p, q + y)
-			&& m_well.get_well(x + p, q + y) != '$') {
-			m_screen.printChar(*(piece.get_piece(1) + i));
-			//m_well.set_well(*(piece.get_piece(1) + i), x + p , q + y);
-		}*/
 
-		if (*(piece.get_piece(1) + i) == '#') {
-			m_screen.printChar(*(piece.get_piece(1) + i));
-			m_well.set_well(*(piece.get_piece(1) + i), x + p, q + y);
+		if (*(piece.get_piece() + i) == '#') {
+			m_screen.printChar(*(piece.get_piece() + i));
+			m_well.set_well(*(piece.get_piece() + i), x + p, q + y);
 		}
 	}
 }
@@ -159,13 +154,8 @@ void Game::erasePiece(Piece piece, const int& x, const int& y) {
 		int p = i % 4;
 		int q = i / 4;
 		m_screen.gotoXY(x + p, q + y);
-		/*if ((*(piece.get_piece(1) + i) == '#' || *(piece.get_piece(1) + i) == ' ') 
-			&& m_well.set_well('_', x + p, q + y) && m_well.get_well(x + p, q + y) != '$') {
-			m_screen.printChar(' ');
-			//m_well.set_well('_', x + p, q + y);
-		}*/
-		
-		if (*(piece.get_piece(1) + i) == '#') {
+
+		if (*(piece.get_piece() + i) == '#') {
 			m_screen.printChar(' ');
 			m_well.set_well(' ', x + p, q + y);
 		}
@@ -187,25 +177,24 @@ void Game::erasePiece(Piece piece, const int& x, const int& y) {
 		//at the end, swap the two vectors
 
 bool Game::rotatePiece(Piece piece, int x, int y) {
-	Well new_well(m_well);
-	char** arr = new char*[4];
-	for (int i = 0; i < 4; ++i) {
-		*(arr + i) = new char[4];
-	}
-	for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
-		for (int j = 0; j < m_well.get_sizeY(); j++) {
-			if (m_well.get_well(i, j) == '#') {
-				;
-			}
+
+	for (int i = 0; i < 16; i++) {
+
+		int p = i % 4;
+		int q = i / 4;
+		piece.increment_orientation();
+
+		//orientation in the parameter here is incorrect
+		if (*(piece.get_piece() + i) == '#' && (m_well.get_well(x + p, y + q) == '$' || m_well.get_well(x + p, y + q) == '@')) { //change orientation number later
+			piece.decrement_orientation();
+			return false;
 		}
 	}
+	
+	erasePiece(piece, x, y);
+	printPiece(piece, x, y);
 
-	/*deleting the array*/
-	for (int i = 0; i < 4; ++i)
-		delete[] arr[i];
-	delete[] arr;
-
-	return false;
+	return true;
 }
 
 void Game::pieceToRow(Piece piece) {

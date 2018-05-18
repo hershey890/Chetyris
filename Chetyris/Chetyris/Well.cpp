@@ -5,23 +5,16 @@
 //Well::Well() : m_well_size_x(0), m_well_size_y(0) {}
 
 Well::Well(int well_size_x, int well_size_y)
-: m_well_size_x(well_size_x), m_well_size_y(well_size_y), m_well(m_well_size_x, std::vector<char>(m_well_size_y)),
-  m_well_bounding_box(m_well_size_x, std::vector<char>(m_well_size_y))
+: m_well_size_x(well_size_x), m_well_size_y(well_size_y), m_well(m_well_size_x, std::vector<char>(m_well_size_y))
 {
 	for (int i = 0; i < m_well_size_x; i++) {
 		for (int j = 0; j < m_well_size_y; j++) {
 			m_well[i][j] = '_'; //'_' is the default blank value of the well
 		}
 	}
-
-	for (int i = 0; i < m_well_size_x; i++) {
-		for (int j = 0; j < m_well_size_y; j++) {
-			m_well_bounding_box[i][j] = '_'; //'_' is the default blank value of the well
-		}
-	}
 }
 
-Well::Well(const Well& old_well) {
+/*Well::Well(const Well& old_well) {
 	this->m_well_size_x = old_well.m_well_size_x;
 	this->m_well_size_y = old_well.m_well_size_y;
 	for (int i = 0; i < m_well_size_x; i++) {
@@ -40,7 +33,7 @@ Well& Well::operator=(const Well& old_well) {
 		}
 	}
 	return *this;
-}
+}*/
 
 Well::~Well() {}
 
