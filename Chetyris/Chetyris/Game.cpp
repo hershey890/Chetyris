@@ -30,7 +30,8 @@ const int NEXT_PIECE_X = 16;
 const int NEXT_PIECE_Y = 4;
 
 Game::Game(int width, int height)
- : m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1), m_well(width + 2, height + 1)
+	: m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1), m_well(width + 2, height + 1),
+	m_rows_destroyed(0)
 {
 }
 
@@ -97,6 +98,8 @@ bool Game::playOneLevel()
 		char key_press;
 		getCharIfAny(key_press);
 
+		destroyRow();
+
 		if (!canMove(DOWN, piece)) { /*restarts the loop essentially if piece can't move down further*/
 			Piece piece1(chooseRandomPieceType()); //selects a new piece randomly 
 			piece = piece1;
@@ -121,22 +124,28 @@ bool Game::playOneLevel()
 			if (key_press == '2')
 				t.start();
 			key_press = 'x'; //changes the key_press to a random char that does nothing
+			continue;
 		}
 		else if (key_press == ' ') { //sends the piece to the bottom -- spacebar
 			movePiece(piece, key_press, x_pos, y_pos);
+			continue;
 		}
 		else if (key_press == 'q' || key_press == 'Q') { //quit
 			break;
 		}
 		else if (key_press == '8') { //up key
 			rotatePiece(piece, x_pos, y_pos);
+			key_press = 'x';
+			continue;
 		}
+
+		//discardPendingKeys();
 	}
 
     return false;
 }
 
-void Game::printPiece(Piece piece, const int& x, const int& y) {
+void Game::printPiece(Piece& piece, const int& x, const int& y) {
 	for (int i = 0; i < 16; i++) {
 		int p = i % 4;
 		int q = i / 4;
@@ -149,55 +158,51 @@ void Game::printPiece(Piece piece, const int& x, const int& y) {
 	}
 }
 
-void Game::erasePiece(Piece piece, const int& x, const int& y) {
+void Game::erasePiece(Piece& piece, const int& x, const int& y) {
+
+	int num_hash = 0;
+
 	for (int i = 0; i < 16; i++) {
+		if (num_hash == 4)
+			break;
+
 		int p = i % 4;
 		int q = i / 4;
 		m_screen.gotoXY(x + p, q + y);
 
 		if (*(piece.get_piece() + i) == '#') {
+			num_hash++;
 			m_screen.printChar(' ');
 			m_well.set_well(' ', x + p, q + y);
 		}
 	}
 }
 
-//make a copy of the original vector
-//find the location of the first #
-//save the rest of the array after that point
-	//stop when when 4 # have been saved, or when 4 rows have been passed through
-//replace everything that is not a # with ' '
-//compare with the original m_piece arrays
-//if the character in the array is a '#', take it and substute it into the copy vector
-	//if it alignes with any $ or @, can't turn
-		//how to find the starting point for the substitution?
-		//the array number gives us the starting point
-		//move back to the 0 position and start substitution from there
-	//else substitute the point with # and delete the old #
-		//at the end, swap the two vectors
-
-bool Game::rotatePiece(Piece piece, int x, int y) {
+bool Game::rotatePiece(Piece& piece, const int& x, const int& y) {
 
 	for (int i = 0; i < 16; i++) {
 
 		int p = i % 4;
 		int q = i / 4;
+
 		piece.increment_orientation();
 
-		//orientation in the parameter here is incorrect
+		////orientation in the parameter here is incorrect
 		if (*(piece.get_piece() + i) == '#' && (m_well.get_well(x + p, y + q) == '$' || m_well.get_well(x + p, y + q) == '@')) { //change orientation number later
 			piece.decrement_orientation();
 			return false;
 		}
+		piece.decrement_orientation();
 	}
-	
+
 	erasePiece(piece, x, y);
+	piece.increment_orientation();
 	printPiece(piece, x, y);
 
 	return true;
 }
 
-void Game::pieceToRow(Piece piece) {
+void Game::pieceToRow(Piece& piece) {
 	for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
 		for (int j = 0; j < m_well.get_sizeY(); j++) {
 			if (m_well.get_well(i, j) == '#') {
@@ -209,14 +214,14 @@ void Game::pieceToRow(Piece piece) {
 	}
 }
 
-bool Game::canMove(m_direction dir, Piece piece) {
+bool Game::canMove(const m_direction& dir, Piece& piece) {
 	/*Checks if the piece is capable of shifting downwards, also converts the piece to '$' if it can't
 	move down any further*/
 	if (dir == DOWN) {
 		for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
 			for (int j = 0; j < m_well.get_sizeY(); j++) {
 				if (m_well.get_well(i, j) == '#' && (m_well.get_well(i, j + 1) == '@' || m_well.get_well(i, j + 1) == '$')) {
-					pieceToRow(piece); /*converts the piecec to '$'*/
+					pieceToRow(piece); /*converts the piece to '$'*/
 					return false;
 				}
 			}
@@ -262,7 +267,7 @@ bool Game::canMove(m_direction dir, Piece piece) {
 	return false; //if none of the cases are false, return true - piece can move in that direction
 }
 
-void Game::movePiece(const Piece& piece, const char& ch, int& x, int& y) {
+void Game::movePiece(Piece& piece, const char& ch, int& x, int& y) {
 	if (ch == '4' && canMove(LEFT, piece)) {//left case
 		erasePiece(piece, x, y);
 		printPiece(piece, --x, y);
@@ -282,9 +287,42 @@ void Game::movePiece(const Piece& piece, const char& ch, int& x, int& y) {
 }
 
 //T = maximum(1000-(100*(L-1)), 100)
-double Game::timeLeft(Timer timer, const int level) const {
+double Game::timeLeft(Timer& timer, const int level) const {
 	if (1000 - (100 * (level - 1)) < 100)
 		return 100;
 	else
 		return 1000 - (100 * (level - 1));
+}
+
+bool Game::destroyRow() {
+
+	for (int j = m_well.get_sizeY() - 1; j > 0; j--) {
+		int num_dollar = 0;
+		for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
+			if (m_well.get_well(i, j) == '$') {
+				num_dollar++;
+			}
+		}
+		
+		// Shift all blocks down by one
+		if (num_dollar == 10) {
+			for (int y = j; y > 0; y--) {
+				for (int x = 1; x < m_well.get_sizeX() - 1; x++) {
+					m_well.set_well(m_well.get_well(x, y - 1), x, y);
+					if (m_well.get_well(x, y - 1) == '$') {
+						m_screen.gotoXY(x, y);
+						m_screen.printChar(m_well.get_well(x, y - 1));
+					}
+					else if (m_well.get_well(x, y - 1) == ' ') {
+						m_screen.gotoXY(x, y);
+						m_screen.printChar(' ');
+					}
+				}
+			}
+			return true;
+		}
+		
+	}
+	
+	return false;
 }

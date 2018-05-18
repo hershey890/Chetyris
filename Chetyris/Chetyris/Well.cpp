@@ -9,31 +9,10 @@ Well::Well(int well_size_x, int well_size_y)
 {
 	for (int i = 0; i < m_well_size_x; i++) {
 		for (int j = 0; j < m_well_size_y; j++) {
-			m_well[i][j] = '_'; //'_' is the default blank value of the well
+			m_well[i][j] = ' '; //'_' is the default blank value of the well
 		}
 	}
 }
-
-/*Well::Well(const Well& old_well) {
-	this->m_well_size_x = old_well.m_well_size_x;
-	this->m_well_size_y = old_well.m_well_size_y;
-	for (int i = 0; i < m_well_size_x; i++) {
-		for (int j = 0; j < m_well_size_y; j++) {
-			this->m_well[i][j] = old_well.m_well[i][j];
-		}
-	}
-}
-
-Well& Well::operator=(const Well& old_well) {
-	this->m_well_size_x = old_well.m_well_size_x;
-	this->m_well_size_y = old_well.m_well_size_y;
-	for (int i = 0; i < m_well_size_x; i++) {
-		for (int j = 0; j < m_well_size_y; j++) {
-			this->m_well[i][j] = old_well.m_well[i][j];
-		}
-	}
-	return *this;
-}*/
 
 Well::~Well() {}
 

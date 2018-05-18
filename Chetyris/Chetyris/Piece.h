@@ -11,7 +11,7 @@ PieceType chooseRandomPieceType();
 
 class Piece {
 public:
-	Piece(PieceType piecetype);
+	Piece(const PieceType& piecetype);
 
 	/*returns the pointer for the first char in a char array for the
 	pieces*/
@@ -31,7 +31,7 @@ private:
 	char m_piece_I_4[16] { ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ' };
 
 	char m_piece_L_1[16] { ' ', ' ', ' ', ' ', '#', '#', '#', ' ', '#', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-	char m_piece_L_2[16] { ' ', '#', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ' };
+	char m_piece_L_2[16] { ' ', '#', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', ' ', ' ' };
 	char m_piece_L_3[16] { ' ', ' ', ' ', ' ', ' ', ' ', '#', ' ', '#', '#', '#', ' ', ' ', ' ', ' ', ' ' };
 	char m_piece_L_4[16] { ' ', ' ', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', ' ', ' ', ' ', '#', '#', ' ' };
 

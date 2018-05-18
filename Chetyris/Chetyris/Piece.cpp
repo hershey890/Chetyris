@@ -1,6 +1,6 @@
 #include "Piece.h"
 #include <cassert>
-Piece::Piece(PieceType piecetype): m_piece_type(piecetype), m_orientation(1) {}
+Piece::Piece(const PieceType& piecetype): m_piece_type(piecetype), m_orientation(1) {}
 
 int Piece::increment_orientation() {
 	m_orientation++;
@@ -22,11 +22,12 @@ int Piece::get_orientation() const {
 
 char* Piece::get_piece()
 {
-	PieceType piece = m_piece_type;
+	//PieceType piece = m_piece_type;
 
 	assert(!(get_orientation() > 4 || get_orientation() < 1));
+	//assert(!(get_orientation() == 3));
 
-	switch (piece) {
+	switch (m_piece_type) { //used to hold piece
 		case PIECE_I:
 			switch (get_orientation()) {
 				case 1:
@@ -56,7 +57,7 @@ char* Piece::get_piece()
 				case 2:
 					return m_piece_J_2;
 				case 3:
-					return m_piece_J_4;
+					return m_piece_J_3;
 				case 4:
 					return m_piece_J_4;
 			}
@@ -128,8 +129,6 @@ char* Piece::get_piece()
 				case 4:
 					return m_piece_crazy_4;
 			}
-		default:
-			break;
 	}
 	return nullptr;
 }
