@@ -36,9 +36,7 @@ Game::Game(int width, int height)
 	: m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1), m_well(width + 2, height + 1),
 	m_rows_destroyed(0), m_rows_left(5), m_score(0),
 	m_current_piece(chooseRandomPieceType()), m_next_piece(chooseRandomPieceType())
-	//m_current_piece(PIECE_FOAM), m_next_piece(chooseRandomPieceType())
-{
-}
+{}
 
 
 void Game::play()
@@ -75,8 +73,7 @@ void Game::displayNextPiece() {
 }
 
 
-void Game::displayPrompt(const std::string s)     
-{
+void Game::displayPrompt(const std::string s) {
     m_screen.gotoXY(PROMPT_X, PROMPT_Y);
     m_screen.printStringClearLine(s);   // overwrites previous text
 	m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
@@ -212,7 +209,6 @@ void Game::printPiece(Piece& piece, const int& x, const int& y) {
 		if (*(piece.get_piece() + i) == '#' && m_well.set_well(*(piece.get_piece() + i), x + p, q + y)) {
 			m_screen.gotoXY(x + p, q + y);
 			m_screen.printChar(*(piece.get_piece() + i));
-
 			m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 
 		}
@@ -307,9 +303,10 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 					else {
 						/* VAPOR BOMB */
 						if (piece.get_piece_type() == PIECE_VAPOR) {
-							for (int y = j; y < m_well.get_sizeY() - 1 && y - j < 3; y++) {
+							vaporBomb();
+							/*for (int y = j; y < m_well.get_sizeY() - 1 && y - j < 3; y++) {
 								if (m_well.set_well(' ', i, y) && m_well.set_well(' ', i + 1, y)) {
-									m_screen.gotoXY(i, y);
+									m_screen.gotoXY(i, y);	
 									m_screen.printChar(' ');
 
 									m_screen.gotoXY(i + 1, y);
@@ -329,7 +326,7 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 
 									m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 								}
-							}
+							}*/
 							return false;
 						}
 
@@ -384,6 +381,48 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 	}
 
 	return false; //if none of the cases are false, return true - piece can move in that direction
+}
+
+
+bool Game::vaporBomb() {
+	int num_hash;
+	char well_contents;
+
+	if (m_current_piece.get_piece_type() == PIECE_VAPOR) {
+		for (int j = 0; j < m_well.get_sizeY(); j++) {
+			for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
+				if (m_well.get_well(well_contents, i, j) && well_contents == '#') {
+
+					for (int y = j; y < m_well.get_sizeY() - 1 && y - j < 3; y++) {
+						if (m_well.set_well(' ', i, y) && m_well.set_well(' ', i + 1, y)) {
+							m_screen.gotoXY(i, y);
+							m_screen.printChar(' ');
+
+							m_screen.gotoXY(i + 1, y);
+							m_screen.printChar(' ');
+
+							m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+						}
+					}
+
+					for (int y = j; y > 0 && j - y < 3; y--) {
+						if (m_well.set_well(' ', i, y) && m_well.set_well(' ', i + 1, y)) {
+							m_screen.gotoXY(i, y);
+							m_screen.printChar(' ');
+
+							m_screen.gotoXY(i + 1, y);
+							m_screen.printChar(' ');
+
+							m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+						}
+					}
+
+					return false;
+				}
+			}
+		}
+	}
+	return true;
 }
 
 

@@ -62,6 +62,8 @@ class Game
 	void displayNextPiece();
 
 	bool game_ended();
+
+	bool vaporBomb();
 };
 
 #endif // GAME_INCLUDED
