@@ -29,11 +29,14 @@ const int NEXT_PIECE_TITLE_Y = 3;
 const int NEXT_PIECE_X = 16;
 const int NEXT_PIECE_Y = 4;
 
+const int X_POS = 3;
+const int Y_POS = 0;
+
 Game::Game(int width, int height)
 	: m_screen(SCREEN_WIDTH, SCREEN_HEIGHT), m_level(1), m_well(width + 2, height + 1),
 	m_rows_destroyed(0), m_rows_left(5), m_score(0),
-	//m_current_piece(chooseRandomPieceType()), m_next_piece(chooseRandomPieceType())
-	m_current_piece(PIECE_FOAM), m_next_piece(chooseRandomPieceType())
+	m_current_piece(chooseRandomPieceType()), m_next_piece(chooseRandomPieceType())
+	//m_current_piece(PIECE_FOAM), m_next_piece(chooseRandomPieceType())
 {
 }
 
@@ -65,6 +68,8 @@ void Game::displayNextPiece() {
 		int q = i / 4;
 		m_screen.gotoXY(NEXT_PIECE_X + p, NEXT_PIECE_Y + q);
 		m_screen.printChar(*(m_next_piece.get_piece() + i));
+		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+
 	}
 }
 
@@ -72,6 +77,7 @@ void Game::displayPrompt(const std::string s)
 {
     m_screen.gotoXY(PROMPT_X, PROMPT_Y);
     m_screen.printStringClearLine(s);   // overwrites previous text
+	m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
     m_screen.refresh();
 }
 
@@ -82,12 +88,14 @@ void Game::displayStatus() {
 	m_screen.printString("Score:     ");
 	m_screen.gotoXY(SCORE_X + 17, SCORE_Y);
 	m_screen.printString(std::to_string(m_score));
+	m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 	
 	/* ROWS LEFT */
 	m_screen.gotoXY(ROWS_LEFT_X, ROWS_LEFT_Y);
 	m_screen.printString("Rows Left: ");
 	m_screen.gotoXY(ROWS_LEFT_X + 17, ROWS_LEFT_Y);
 	m_screen.printString(std::to_string(rows_left()));
+	m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 	//m_screen.printChar(rows_left() + 48); 
 
 	/* LEVEL */
@@ -95,6 +103,7 @@ void Game::displayStatus() {
 	m_screen.printString("Level:     ");
 	m_screen.gotoXY(LEVEL_X + 17, LEVEL_Y);
 	m_screen.printString(std::to_string(m_level));
+	m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 }
 
 
@@ -118,23 +127,23 @@ bool Game::playOneLevel() {
 		destroyRow();	//modifies m_rows_detroyed
 
 		switch (m_rows_destroyed - prev_rows_destroyed) {
-			case(1): 
-				m_score += 100;
-				break;
-			case(2):
-				m_score += 200;
-				break;
-			case(3):
-				m_score += 400;
-				break;
-			case(4):
-				m_score += 800;
-				break;
-			case(5):
-				m_score += 1600;
-				break;
-			default: //maybe should do something with this
-				break;
+		case(1):
+			m_score += 100;
+			break;
+		case(2):
+			m_score += 200;
+			break;
+		case(3):
+			m_score += 400;
+			break;
+		case(4):
+			m_score += 800;
+			break;
+		case(5):
+			m_score += 1600;
+			break;
+		default: //maybe should do something with this
+			break;
 		}
 
 		/* CREATES A NEW PIECE IF THE CURRENT PIECE CAN'T MOVE DOWN ANY FURTHER */
@@ -146,44 +155,46 @@ bool Game::playOneLevel() {
 			x_pos = 3;
 			y_pos = 0;
 			key_press = 'x';
-			displayStatus();
-			continue;
+			//displayStatus();
+			//continue;
 		}
-		
+
 		/* RESTARTS THE TIMER BASED ON T = maximum(1000-(100*(L-1)), 100) */
-		if (timer.elapsed() >= timeLeft(timer)) {
+		else if (timer.elapsed() >= timeLeft(timer)) {
 			erasePiece(m_current_piece, x_pos, y_pos);
 			y_pos++;
 			printPiece(m_current_piece, x_pos, y_pos);
 			timer.start();
-			displayStatus();
-			continue;
+			//displayStatus();
+			//continue;
 		}
 
-		/* PROCESSES KEYSTROKE */
-		if (key_press == '4' || key_press == '6' || key_press == '2') {		//move the char left, right or down
-			if (m_current_piece.get_piece_type() == PIECE_CRAZY) {
-				(key_press == '4') ? key_press = '6' : 
-				(key_press == '6') ? key_press = '4' : 
-				(key_press == '2');
+		else {
+			/* PROCESSES KEYSTROKE */
+			if (key_press == 'q' || key_press == 'Q' || !game_ended()) { //quit
+				return false;
 			}
+			else if (key_press == '4' || key_press == '6' || key_press == '2') {		//move the char left, right or down
+				if (m_current_piece.get_piece_type() == PIECE_CRAZY) {
+					(key_press == '4') ? key_press = '6' :
+						(key_press == '6') ? key_press = '4' :
+						(key_press == '2');
+				}
 
-			movePiece(m_current_piece, key_press, x_pos, y_pos); //move char LR, also modifies x_pos
-			if (key_press == '2')	// restarts the timer if the piece is moved down
-				timer.start();
-			key_press = 'x'; //changes the key_press to a random char that does nothing
+				movePiece(m_current_piece, key_press, x_pos, y_pos); //move char LR, also modifies x_pos
+				if (key_press == '2')	// restarts the timer if the piece is moved down
+					timer.start();
+				key_press = 'x'; //changes the key_press to a random char that does nothing
+			}
+			else if (key_press == ' ') {	//sends the piece to the bottom -- spacebar
+				movePiece(m_current_piece, key_press, x_pos, y_pos);
+			}
+			else if (key_press == '8') {	//up key
+				rotatePiece(m_current_piece, x_pos, y_pos);
+				key_press = 'x';
+			}
+			displayStatus();
 		}
-		else if (key_press == ' ') {	//sends the piece to the bottom -- spacebar
-			movePiece(m_current_piece, key_press, x_pos, y_pos);
-		}
-		else if (key_press == 'q' || key_press == 'Q') { //quit
-			return false;
-		}
-		else if (key_press == '8') {	//up key
-			rotatePiece(m_current_piece, x_pos, y_pos);
-			key_press = 'x';	
-		}
-		displayStatus();
 	}
 
 	reset();
@@ -199,6 +210,9 @@ void Game::printPiece(Piece& piece, const int& x, const int& y) {
 		if (*(piece.get_piece() + i) == '#' && m_well.set_well(*(piece.get_piece() + i), x + p, q + y)) {
 			m_screen.gotoXY(x + p, q + y);
 			m_screen.printChar(*(piece.get_piece() + i));
+
+			m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
+
 		}
 	}
 }
@@ -219,6 +233,8 @@ void Game::erasePiece(Piece& piece, const int& x, const int& y) {
 			num_hash++;
 			m_screen.gotoXY(x + p, q + y);
 			m_screen.printChar(' ');
+
+			m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		}
 	}
 }
@@ -257,6 +273,8 @@ void Game::pieceToRow(Piece& piece) {
 			if (m_well.get_well(i, j) == '#' && m_well.set_well('$', i, j)) {
 				m_screen.gotoXY(i, j);
 				m_screen.printChar('$');
+
+				m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 			}
 		}
 	}
@@ -290,6 +308,8 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 
 									m_screen.gotoXY(i + 1, y);
 									m_screen.printChar(' ');
+
+									m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 								}
 							}
 
@@ -300,6 +320,8 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 
 									m_screen.gotoXY(i + 1, y);
 									m_screen.printChar(' ');
+
+									m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 								}
 							}
 						}
@@ -405,10 +427,14 @@ bool Game::destroyRow() {
 					if (m_well.get_well(x, y - 1) == '$' || m_well.get_well(x, y - 1) == '*') {
 						m_screen.gotoXY(x, y);
 						m_screen.printChar(m_well.get_well(x, y - 1));
+
+						m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 					}
 					else if (m_well.get_well(x, y - 1) == ' ') {
 						m_screen.gotoXY(x, y);
 						m_screen.printChar(' ');
+
+						m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 					}
 				}
 			}
@@ -437,6 +463,8 @@ void Game::reset() {
 			if (m_well.set_well(m_well.get_well(x, y), x, y)) {
 				m_screen.gotoXY(x, y);
 				m_screen.printChar(m_well.get_well(x, y));
+
+				m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 			}
 		}
 	}
@@ -454,30 +482,40 @@ bool Game::foam_bomb(const int& x, const int& y, int x_filledL, int x_filledR, i
 	else {
 		m_screen.gotoXY(x, y);
 		m_screen.printChar('*');
+
+		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 	}
 
 	if (m_well.get_well(x + 1, y) == ' ' && x_filledR > 0 && m_well.set_well('*', x + 1, y) && foam_bomb(x + 1, y, x_filledL, --x_filledR, y_filledU, y_filledD)) {
 		m_screen.gotoXY(x + 1, y);
 		m_screen.printChar('*');	
 		//foam_bomb(x + 1, y, x_filledR--);
+
+		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 	if (m_well.get_well(x - 1, y) == ' ' && x_filledL > 0 && m_well.set_well('*', x - 1, y) && foam_bomb(x - 1, y, --x_filledL, x_filledR, y_filledU, y_filledD)) {
 		m_screen.gotoXY(x - 1, y);
 		m_screen.printChar('*');
 		//foam_bomb(x - 1, y, x_filledL--);
+
+		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 	if (m_well.get_well(x, y + 1) == ' ' && y_filledU > 0 && m_well.set_well('*', x, y + 1) && foam_bomb(x, y + 1, x_filledL, x_filledR, --y_filledU, y_filledD)) {
 		m_screen.gotoXY(x, y + 1);
 		m_screen.printChar('*');
 		//foam_bomb(x, y + 1, y_filledU--);
+
+		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 	if (m_well.get_well(x, y - 1) == ' ' && y_filledD > 0 && m_well.set_well('*', x, y - 1) && foam_bomb(x, y - 1, x_filledL, x_filledR, y_filledU, --y_filledD)) {
 		m_screen.gotoXY(x, y - 1);
 		m_screen.printChar('*');
 		//foam_bomb(x, y - 1, y_filledD--);
+
+		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 
@@ -489,4 +527,16 @@ bool Game::foam_bomb(const int& x, const int& y, int x_filledL, int x_filledR, i
 		m_screen.printChar('*');
 	}
 	*/
+}
+
+bool Game::game_ended() {
+	for (int i = 0; i < 16; i++) {
+		int p = i % 4;
+		int q = i / 4;
+
+		if (*(m_current_piece.get_piece() + i) == '#' && (m_well.get_well(X_POS + p, Y_POS + q) == '$' || m_well.get_well(X_POS + p, Y_POS + q) == '*')) {
+			return false;
+		}
+	}
+	return true;
 }

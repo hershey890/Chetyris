@@ -60,6 +60,8 @@ class Game
 	bool foam_bomb(const int& x, const int& y, int x_filledL = 2, int x_filledR = 2, int y_filledU = 2, int y_filledD = 2);
 
 	void displayNextPiece();
+
+	bool game_ended();
 };
 
 #endif // GAME_INCLUDED
