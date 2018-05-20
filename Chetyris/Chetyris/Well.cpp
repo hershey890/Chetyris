@@ -38,8 +38,12 @@ void Well::display(Screen& screen, int x, int y)
 	}
 }
 
-char Well::get_well(const int x, const int y) const {
-	return m_well[x][y];
+bool Well::get_well(char& ch, const int& x, const int& y) const {
+	if (x >= 0 && x < m_well_size_x && y >= 0 && y <= m_well_size_y) {
+		ch = m_well[x][y];
+		return true;
+	}
+	return false;
 }
 
 bool Well::set_well(const char c, const int x, const int y) {
