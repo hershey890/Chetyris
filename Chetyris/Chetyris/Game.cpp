@@ -59,6 +59,7 @@ void Game::play()
     waitForEnter();
 }
 
+
 void Game::displayNextPiece() {
 	/* NEXT PIECE */
 	m_screen.gotoXY(NEXT_PIECE_TITLE_X, NEXT_PIECE_TITLE_Y);
@@ -72,6 +73,7 @@ void Game::displayNextPiece() {
 
 	}
 }
+
 
 void Game::displayPrompt(const std::string s)     
 {
@@ -470,6 +472,7 @@ void Game::reset() {
 	}
 }
 
+
 bool Game::foam_bomb(const int& x, const int& y, int x_filledL, int x_filledR, int y_filledU, int y_filledD) {
 	
 	if (x_filledL == 0 && x_filledR == 0 && y_filledU == 0 && y_filledD == 0)
@@ -489,45 +492,31 @@ bool Game::foam_bomb(const int& x, const int& y, int x_filledL, int x_filledR, i
 	if (m_well.get_well(x + 1, y) == ' ' && x_filledR > 0 && m_well.set_well('*', x + 1, y) && foam_bomb(x + 1, y, x_filledL, --x_filledR, y_filledU, y_filledD)) {
 		m_screen.gotoXY(x + 1, y);
 		m_screen.printChar('*');	
-		//foam_bomb(x + 1, y, x_filledR--);
-
 		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 	if (m_well.get_well(x - 1, y) == ' ' && x_filledL > 0 && m_well.set_well('*', x - 1, y) && foam_bomb(x - 1, y, --x_filledL, x_filledR, y_filledU, y_filledD)) {
 		m_screen.gotoXY(x - 1, y);
 		m_screen.printChar('*');
-		//foam_bomb(x - 1, y, x_filledL--);
-
 		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 	if (m_well.get_well(x, y + 1) == ' ' && y_filledU > 0 && m_well.set_well('*', x, y + 1) && foam_bomb(x, y + 1, x_filledL, x_filledR, --y_filledU, y_filledD)) {
 		m_screen.gotoXY(x, y + 1);
 		m_screen.printChar('*');
-		//foam_bomb(x, y + 1, y_filledU--);
-
 		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 	if (m_well.get_well(x, y - 1) == ' ' && y_filledD > 0 && m_well.set_well('*', x, y - 1) && foam_bomb(x, y - 1, x_filledL, x_filledR, y_filledU, --y_filledD)) {
 		m_screen.gotoXY(x, y - 1);
 		m_screen.printChar('*');
-		//foam_bomb(x, y - 1, y_filledD--);
-
 		m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
 		return true;
 	}
 
 	return false;
-	/*
-	if (m_well.get_well(x, y) == ' ') {
-		m_well.set_well('*', x, y);
-		m_screen.gotoXY(x, y);
-		m_screen.printChar('*');
-	}
-	*/
 }
+
 
 bool Game::game_ended() {
 	for (int i = 0; i < 16; i++) {
