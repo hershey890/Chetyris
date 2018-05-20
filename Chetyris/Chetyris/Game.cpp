@@ -37,6 +37,7 @@ Game::Game(int width, int height)
 {
 }
 
+
 void Game::play()
 {
     m_well.display(m_screen, WELL_X, WELL_Y);
@@ -55,6 +56,7 @@ void Game::play()
     waitForEnter();
 }
 
+
 void Game::displayPrompt(const std::string s)     
 {
     m_screen.gotoXY(PROMPT_X, PROMPT_Y);
@@ -62,13 +64,14 @@ void Game::displayPrompt(const std::string s)
     m_screen.refresh();
 }
 
+
 void Game::displayStatus()
 {
 	/* SCORE */
 	m_screen.gotoXY(SCORE_X, SCORE_Y);
 	m_screen.printString("Score:     ");
 	m_screen.gotoXY(SCORE_X + 17, SCORE_Y);
-	m_screen.printString(std::to_string(m_score)); //TEMPORARY PLACEHOLDER
+	m_screen.printString(std::to_string(m_score));
 	
 	/* ROWS LEFT */
 	m_screen.gotoXY(ROWS_LEFT_X, ROWS_LEFT_Y);
@@ -84,25 +87,18 @@ void Game::displayStatus()
 	m_screen.printString(std::to_string(m_level));
 
 	/* NEXT PIECE */
-	//print out m_next_piece here
 	m_screen.gotoXY(NEXT_PIECE_TITLE_X, NEXT_PIECE_TITLE_Y);
 	m_screen.printString("Next Piece:");
-
 	for (int i = 0; i < 16; i++) {
 		int p = i % 4;
 		int q = i / 4;
 		m_screen.gotoXY(NEXT_PIECE_X + p, NEXT_PIECE_Y + q);
 		m_screen.printChar(*(m_next_piece.get_piece() + i));
 	}
-
-	//m_screen.gotoXY(NEXT_PIECE_X, NEXT_PIECE_Y);
-	//m_screen.printChar('1'); //TEMPORARY PLACEHOLDER
 }
 
-bool Game::playOneLevel()
-{
-	//Piece piece(chooseRandomPieceType());
-	//Piece next_piece(chooseRandomPieceType());
+
+bool Game::playOneLevel() {
 
 	int x_pos = 3; //initial x pos
 	int y_pos = 0; //initial y pos
@@ -112,12 +108,13 @@ bool Game::playOneLevel()
 
 	while (rows_left() != 0) {
 
-		/*takes in keystroke*/
+		/* TAKES IN KEYSTROKE */
 		char key_press;
 		getCharIfAny(key_press);
 
+		/* CALCULATES SCORE */
 		int prev_rows_destroyed = m_rows_destroyed;
-		destroyRow(); //modifies m_rows_detroyed
+		destroyRow();	//modifies m_rows_detroyed
 
 		switch (m_rows_destroyed - prev_rows_destroyed) {
 			case(1): 
@@ -139,11 +136,11 @@ bool Game::playOneLevel()
 				break;
 		}
 
-		if (!canMove(DOWN, m_current_piece)) { /*restarts the loop if piece can't move down further*/
+		/* CREATES A NEW PIECE IF THE CURRENT PIECE CAN'T MOVE DOWN ANY FURTHER */
+		if (!canMove(DOWN, m_current_piece)) {
 			m_current_piece = m_next_piece;
-			Piece new_piece(chooseRandomPieceType()); //selects a new piece randomly 
+			Piece new_piece(chooseRandomPieceType());	//selects a new piece randomly 
 			m_next_piece = new_piece;
-			//displayStatus();
 			timer.start();
 			x_pos = 3;
 			y_pos = 0;
@@ -152,6 +149,7 @@ bool Game::playOneLevel()
 			continue;
 		}
 		
+		/* RESTARTS THE TIMER BASED ON T = maximum(1000-(100*(L-1)), 100) */
 		if (timer.elapsed() >= timeLeft(timer)) {
 			erasePiece(m_current_piece, x_pos, y_pos);
 			y_pos++;
@@ -161,37 +159,31 @@ bool Game::playOneLevel()
 			continue;
 		}
 
-		/* Processes keystroke */
-		if (key_press == '4' || key_press == '6' || key_press == '2') {//move the char left, right or down
+		/* PROCESSES KEYSTROKE */
+		if (key_press == '4' || key_press == '6' || key_press == '2') {		//move the char left, right or down
 			movePiece(m_current_piece, key_press, x_pos, y_pos); //move char LR, also modifies x_pos
-			if (key_press == '2') // restarts the timer if the piece is moved down
+			if (key_press == '2')	// restarts the timer if the piece is moved down
 				timer.start();
 			key_press = 'x'; //changes the key_press to a random char that does nothing
-			displayStatus();
-			//continue;
 		}
-		else if (key_press == ' ') { //sends the piece to the bottom -- spacebar
+		else if (key_press == ' ') {	//sends the piece to the bottom -- spacebar
 			movePiece(m_current_piece, key_press, x_pos, y_pos);
-			displayStatus();
-			//continue;
 		}
 		else if (key_press == 'q' || key_press == 'Q') { //quit
-			displayStatus();
 			return false;
 		}
-		else if (key_press == '8') { //up key
+		else if (key_press == '8') {	//up key
 			rotatePiece(m_current_piece, x_pos, y_pos);
 			key_press = 'x';
-			displayStatus();
-			//continue;
+			
 		}
-
-		
+		displayStatus();
 	}
-	
+
 	reset();
     return true;
 }
+
 
 void Game::printPiece(Piece& piece, const int& x, const int& y) {
 	for (int i = 0; i < 16; i++) {
@@ -205,6 +197,7 @@ void Game::printPiece(Piece& piece, const int& x, const int& y) {
 		}
 	}
 }
+
 
 void Game::erasePiece(Piece& piece, const int& x, const int& y) {
 
@@ -226,6 +219,7 @@ void Game::erasePiece(Piece& piece, const int& x, const int& y) {
 	}
 }
 
+
 bool Game::rotatePiece(Piece& piece, const int& x, const int& y) {
 
 	for (int i = 0; i < 16; i++) {
@@ -235,8 +229,8 @@ bool Game::rotatePiece(Piece& piece, const int& x, const int& y) {
 
 		piece.increment_orientation();
 
-		////orientation in the parameter here is incorrect
-		if (*(piece.get_piece() + i) == '#' && (m_well.get_well(x + p, y + q) == '$' || m_well.get_well(x + p, y + q) == '@' || m_well.get_well(x + p, y + q) == '*')) { //change orientation number later
+		if (*(piece.get_piece() + i) == '#' && (m_well.get_well(x + p, y + q) == '$' || 
+			m_well.get_well(x + p, y + q) == '@' || m_well.get_well(x + p, y + q) == '*')) {
 			piece.decrement_orientation();
 			return false;
 		}
@@ -249,6 +243,7 @@ bool Game::rotatePiece(Piece& piece, const int& x, const int& y) {
 
 	return true;
 }
+
 
 void Game::pieceToRow(Piece& piece) {
 	//if (piece.get_piece_type() == PIECE_VAPOR || piece.get_piece_type() == PIECE_FOAM)
@@ -264,6 +259,7 @@ void Game::pieceToRow(Piece& piece) {
 	}
 }
 
+
 bool Game::canMove(const m_direction& dir, Piece& piece) {
 	/*Checks if the piece is capable of shifting downwards, also converts the piece to '$' if it can't
 	move down any further*/
@@ -274,18 +270,18 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 					m_well.get_well(i, j + 1) == '$' || m_well.get_well(i, j + 1) == '*')) {
 
 					/* FOAM BOMB */
-					//if (piece.get_piece_type() == PIECE_FOAM) {
-					//	m_well.set_well('*', i, j);
-					//	m_screen.gotoXY(i, j);
-					//	m_screen.printChar('*');
-					//	foam_bomb(i, j);
-					//}
+					if (piece.get_piece_type() == PIECE_FOAM) {
+						m_well.set_well('*', i, j);
+						m_screen.gotoXY(i, j);
+						m_screen.printChar('*');
+						foam_bomb(i, j);
+					}
 
-					//else {
-
+					else 
+					{
 						/* VAPOR BOMB */
-						/*if (piece.get_piece_type() == PIECE_VAPOR) {
-							for (int y = j; y < m_well.get_sizeY() - 1 && y - j < 2; y++) {
+						if (piece.get_piece_type() == PIECE_VAPOR) {
+							for (int y = j; y < m_well.get_sizeY() - 1 && y - j < 3; y++) {
 								m_well.set_well(' ', i, y);
 								m_screen.gotoXY(i, y);
 								m_screen.printChar(' ');
@@ -295,7 +291,7 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 								m_screen.printChar(' ');
 							}
 
-							for (int y = j; y > 0 && j - y < 2; y--) {
+							for (int y = j; y > 0 && j - y < 3; y--) {
 								m_well.set_well(' ', i, y);
 								m_screen.gotoXY(i, y);
 								m_screen.printChar(' ');
@@ -304,14 +300,10 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 								m_screen.gotoXY(i + 1, y);
 								m_screen.printChar(' ');
 							}
-						}*/
-
-						/* REGULAR PIECE */
-						//else {
-						pieceToRow(piece); /*converts the piece to '$'*/
-					//}
-				//	}
-
+						}
+						/* REGULAR PIECE - converts the piece from '#' to '$' */ 
+						pieceToRow(piece);
+					}
 					return false;
 				}
 			}
@@ -339,7 +331,8 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 	}
 	*/
 
-	else if (dir == LEFT) { //Checks to see if the piece is capable of moving to the left
+	/* LEFT - STOPS PIECE WHEN IT CAN'T MOVE ANY FURTHER TO THE LEFT */
+	else if (dir == LEFT) {
 		for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
 			for (int j = 0; j < m_well.get_sizeY(); j++) {
 				if (m_well.get_well(i, j) == '#' && (m_well.get_well(i - 1, j) == '@' || m_well.get_well(i - 1, j) == '$') || m_well.get_well(i - 1, j) == '*') {
@@ -350,7 +343,8 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 		return true;
 	}
 
-	else if (dir == RIGHT) { //Checks to see if the piece is capable of moving to the right
+	/* RIGHT - STOPS PIECE WHEN IT CAN'T MOVE ANY FURTHER TO THE RIGHT*/
+	else if (dir == RIGHT) {
 		for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
 			for (int j = 0; j < m_well.get_sizeY(); j++) {
 				if (m_well.get_well(i, j) == '#' && (m_well.get_well(i + 1, j) == '@' || m_well.get_well(i + 1, j) == '$' || m_well.get_well(i + 1, j) == '*')) {
@@ -361,9 +355,8 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 		return true;
 	}
 
-	else if (dir == SPACE_DOWN) { /*CHECKS IF THE PIECE IS CAPABLE OF SHIFTING ALL THE WAY DOWNWARDS
-								probably incorrect, need to account for moving all the way
-								down, not just 1 space down*/
+	/* SPACE - STOPS THE PIECE WHEN IT HITS THE BOTTOM OF THE WELL/TOP ROW */
+	else if (dir == SPACE_DOWN) {
 		for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
 			for (int j = 0; j < m_well.get_sizeY(); j++) {
 				if (m_well.get_well(i, j) == '#' && (m_well.get_well(i, j + 1) == '@' || m_well.get_well(i, j + 1) == '$' || m_well.get_well(i, j + 1) == '*')) {
@@ -376,6 +369,7 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 
 	return false; //if none of the cases are false, return true - piece can move in that direction
 }
+
 
 void Game::movePiece(Piece& piece, const char& ch, int& x, int& y) {
 	if (ch == '4' && canMove(LEFT, piece)) {//left case
@@ -396,13 +390,15 @@ void Game::movePiece(Piece& piece, const char& ch, int& x, int& y) {
 	}
 }
 
-//T = maximum(1000-(100*(L-1)), 100)
+
+/* TIME LEFT, BASED ON : T = maximum(1000-(100*(L-1)), 100) */
 double Game::timeLeft(Timer& timer) const {
 	if (1000 - (100 * (m_level - 1)) < 100)
 		return 100;
 	else
 		return 1000 - (100 * (m_level - 1));
 }
+
 
 bool Game::destroyRow() {
 
@@ -439,10 +435,12 @@ bool Game::destroyRow() {
 	return false;
 }
 
+
 int Game::rows_left() {
 	m_rows_left = m_level * 5 - m_rows_destroyed;
 	return m_rows_left;
 }
+
 
 void Game::reset() {
 	m_rows_destroyed = 0;
