@@ -23,6 +23,7 @@ class Game
 	int		m_rows_destroyed;
 	int		m_rows_left;
 	int		m_score;
+	int		m_counter;
 	Piece	m_current_piece;
 	Piece	m_next_piece;
 
@@ -58,7 +59,7 @@ class Game
 
 	bool foam_bomb(const int& x, const int& y, int x_filledL = 2, int x_filledR = 2, int y_filledU = 2, int y_filledD = 2);
 
-	//char get_level() const;
+	void displayNextPiece();
 };
 
 #endif // GAME_INCLUDED

@@ -56,6 +56,17 @@ void Game::play()
     waitForEnter();
 }
 
+void Game::displayNextPiece() {
+	/* NEXT PIECE */
+	m_screen.gotoXY(NEXT_PIECE_TITLE_X, NEXT_PIECE_TITLE_Y);
+	m_screen.printString("Next Piece:");
+	for (int i = 0; i < 16; i++) {
+		int p = i % 4;
+		int q = i / 4;
+		m_screen.gotoXY(NEXT_PIECE_X + p, NEXT_PIECE_Y + q);
+		m_screen.printChar(*(m_next_piece.get_piece() + i));
+	}
+}
 
 void Game::displayPrompt(const std::string s)     
 {
@@ -65,8 +76,7 @@ void Game::displayPrompt(const std::string s)
 }
 
 
-void Game::displayStatus()
-{
+void Game::displayStatus() {
 	/* SCORE */
 	m_screen.gotoXY(SCORE_X, SCORE_Y);
 	m_screen.printString("Score:     ");
@@ -85,16 +95,6 @@ void Game::displayStatus()
 	m_screen.printString("Level:     ");
 	m_screen.gotoXY(LEVEL_X + 17, LEVEL_Y);
 	m_screen.printString(std::to_string(m_level));
-
-	/* NEXT PIECE */
-	m_screen.gotoXY(NEXT_PIECE_TITLE_X, NEXT_PIECE_TITLE_Y);
-	m_screen.printString("Next Piece:");
-	for (int i = 0; i < 16; i++) {
-		int p = i % 4;
-		int q = i / 4;
-		m_screen.gotoXY(NEXT_PIECE_X + p, NEXT_PIECE_Y + q);
-		m_screen.printChar(*(m_next_piece.get_piece() + i));
-	}
 }
 
 
@@ -107,6 +107,7 @@ bool Game::playOneLevel() {
 	timer.start();
 
 	while (rows_left() != 0) {
+		displayNextPiece();
 
 		/* TAKES IN KEYSTROKE */
 		char key_press;
@@ -162,8 +163,9 @@ bool Game::playOneLevel() {
 		/* PROCESSES KEYSTROKE */
 		if (key_press == '4' || key_press == '6' || key_press == '2') {		//move the char left, right or down
 			if (m_current_piece.get_piece_type() == PIECE_CRAZY) {
-				(key_press == 4) ? key_press = 6 : key_press;
-				(key_press == 6) ? key_press = 4 : key_press;
+				(key_press == '4') ? key_press = '6' : 
+				(key_press == '6') ? key_press = '4' : 
+				(key_press == '2');
 			}
 
 			movePiece(m_current_piece, key_press, x_pos, y_pos); //move char LR, also modifies x_pos
@@ -179,8 +181,7 @@ bool Game::playOneLevel() {
 		}
 		else if (key_press == '8') {	//up key
 			rotatePiece(m_current_piece, x_pos, y_pos);
-			key_press = 'x';
-			
+			key_press = 'x';	
 		}
 		displayStatus();
 	}
@@ -194,11 +195,10 @@ void Game::printPiece(Piece& piece, const int& x, const int& y) {
 	for (int i = 0; i < 16; i++) {
 		int p = i % 4;
 		int q = i / 4;
-		m_screen.gotoXY(x + p, q + y);
 
-		if (*(piece.get_piece() + i) == '#') {
+		if (*(piece.get_piece() + i) == '#' && m_well.set_well(*(piece.get_piece() + i), x + p, q + y)) {
+			m_screen.gotoXY(x + p, q + y);
 			m_screen.printChar(*(piece.get_piece() + i));
-			m_well.set_well(*(piece.get_piece() + i), x + p, q + y);
 		}
 	}
 }
@@ -214,12 +214,11 @@ void Game::erasePiece(Piece& piece, const int& x, const int& y) {
 
 		int p = i % 4;
 		int q = i / 4;
-		m_screen.gotoXY(x + p, q + y);
 
-		if (*(piece.get_piece() + i) == '#') {
+		if (*(piece.get_piece() + i) == '#' && m_well.set_well(' ', x + p, q + y)) {
 			num_hash++;
+			m_screen.gotoXY(x + p, q + y);
 			m_screen.printChar(' ');
-			m_well.set_well(' ', x + p, q + y);
 		}
 	}
 }
@@ -255,10 +254,9 @@ void Game::pieceToRow(Piece& piece) {
 
 	for (int i = 1; i < m_well.get_sizeX() - 1; i++) {
 		for (int j = 0; j < m_well.get_sizeY(); j++) {
-			if (m_well.get_well(i, j) == '#') {
+			if (m_well.get_well(i, j) == '#' && m_well.set_well('$', i, j)) {
 				m_screen.gotoXY(i, j);
 				m_screen.printChar('$');
-				m_well.set_well('$', i, j);
 			}
 		}
 	}
@@ -286,23 +284,23 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 						/* VAPOR BOMB */
 						if (piece.get_piece_type() == PIECE_VAPOR) {
 							for (int y = j; y < m_well.get_sizeY() - 1 && y - j < 3; y++) {
-								m_well.set_well(' ', i, y);
-								m_screen.gotoXY(i, y);
-								m_screen.printChar(' ');
+								if (m_well.set_well(' ', i, y) && m_well.set_well(' ', i + 1, y)) {
+									m_screen.gotoXY(i, y);
+									m_screen.printChar(' ');
 
-								m_well.set_well(' ', i + 1, y);
-								m_screen.gotoXY(i + 1, y);
-								m_screen.printChar(' ');
+									m_screen.gotoXY(i + 1, y);
+									m_screen.printChar(' ');
+								}
 							}
 
 							for (int y = j; y > 0 && j - y < 3; y--) {
-								m_well.set_well(' ', i, y);
-								m_screen.gotoXY(i, y);
-								m_screen.printChar(' ');
+								if (m_well.set_well(' ', i, y) && m_well.set_well(' ', i + 1, y)) {
+									m_screen.gotoXY(i, y);
+									m_screen.printChar(' ');
 
-								m_well.set_well(' ', i + 1, y);
-								m_screen.gotoXY(i + 1, y);
-								m_screen.printChar(' ');
+									m_screen.gotoXY(i + 1, y);
+									m_screen.printChar(' ');
+								}
 							}
 						}
 
@@ -436,9 +434,10 @@ void Game::reset() {
 
 	for (int x = 1; x < m_well.get_sizeX() - 1; x++) {
 		for (int y = 0; y < m_well.get_sizeY() - 1; y++) {
-			m_well.set_well(m_well.get_well(x, y), x, y);
-			m_screen.gotoXY(x, y);
-			m_screen.printChar(m_well.get_well(x, y));
+			if (m_well.set_well(m_well.get_well(x, y), x, y)) {
+				m_screen.gotoXY(x, y);
+				m_screen.printChar(m_well.get_well(x, y));
+			}
 		}
 	}
 }
@@ -452,32 +451,30 @@ bool Game::foam_bomb(const int& x, const int& y, int x_filledL, int x_filledR, i
 
 	if (!m_well.set_well('*', x, y))
 		return false;
-	m_screen.gotoXY(x, y);
-	m_screen.printChar('*');
+	else {
+		m_screen.gotoXY(x, y);
+		m_screen.printChar('*');
+	}
 
-	if (m_well.get_well(x + 1, y) == ' ' && x_filledR > 0 && foam_bomb(x + 1, y, x_filledL, --x_filledR, y_filledU, y_filledD)) {
-		m_well.set_well('*', x + 1, y);
+	if (m_well.get_well(x + 1, y) == ' ' && x_filledR > 0 && m_well.set_well('*', x + 1, y) && foam_bomb(x + 1, y, x_filledL, --x_filledR, y_filledU, y_filledD)) {
 		m_screen.gotoXY(x + 1, y);
 		m_screen.printChar('*');	
 		//foam_bomb(x + 1, y, x_filledR--);
 		return true;
 	}
-	if (m_well.get_well(x - 1, y) == ' ' && x_filledL > 0 && foam_bomb(x - 1, y, --x_filledL, x_filledR, y_filledU, y_filledD)) {
-		m_well.set_well('*', x - 1, y);
+	if (m_well.get_well(x - 1, y) == ' ' && x_filledL > 0 && m_well.set_well('*', x - 1, y) && foam_bomb(x - 1, y, --x_filledL, x_filledR, y_filledU, y_filledD)) {
 		m_screen.gotoXY(x - 1, y);
 		m_screen.printChar('*');
 		//foam_bomb(x - 1, y, x_filledL--);
 		return true;
 	}
-	if (m_well.get_well(x, y + 1) == ' ' && y_filledU > 0 && foam_bomb(x, y + 1, x_filledL, x_filledR, --y_filledU, y_filledD)) {
-		m_well.set_well('*', x, y + 1);
+	if (m_well.get_well(x, y + 1) == ' ' && y_filledU > 0 && m_well.set_well('*', x, y + 1) && foam_bomb(x, y + 1, x_filledL, x_filledR, --y_filledU, y_filledD)) {
 		m_screen.gotoXY(x, y + 1);
 		m_screen.printChar('*');
 		//foam_bomb(x, y + 1, y_filledU--);
 		return true;
 	}
-	if (m_well.get_well(x, y - 1) == ' ' && y_filledD > 0 && foam_bomb(x, y - 1, x_filledL, x_filledR, y_filledU, --y_filledD)) {
-		m_well.set_well('*', x, y - 1);
+	if (m_well.get_well(x, y - 1) == ' ' && y_filledD > 0 && m_well.set_well('*', x, y - 1) && foam_bomb(x, y - 1, x_filledL, x_filledR, y_filledU, --y_filledD)) {
 		m_screen.gotoXY(x, y - 1);
 		m_screen.printChar('*');
 		//foam_bomb(x, y - 1, y_filledD--);
