@@ -24,6 +24,7 @@ public:
 	bool set_well(const char c, const int x, const int y);
 	int get_sizeX() const;
 	int get_sizeY() const;
+	void reset();
 private:
 	int m_well_size_x;
 	int m_well_size_y;

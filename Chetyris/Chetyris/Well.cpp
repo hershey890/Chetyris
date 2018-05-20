@@ -58,6 +58,14 @@ int Well::get_sizeY() const {
 	return m_well_size_y;
 }
 
+void Well::reset() {
+	for (int i = 1; i < m_well_size_x - 1; i++) {
+		for (int j = 0; j < m_well_size_y - 1; j++) {
+			m_well[i][j] = ' '; //'_' is the default blank value of the well
+		}
+	}
+}
+
 
 /*
 0

@@ -21,6 +21,11 @@ class Game
     Screen  m_screen;
     int     m_level;
 	int		m_rows_destroyed;
+	int		m_rows_left;
+	int		m_score;
+	Piece	m_current_piece;
+	Piece	m_next_piece;
+
 	enum m_direction { DOWN, LEFT, RIGHT, SPACE_DOWN };
 
 	/*renders the piece in the well*/
@@ -36,7 +41,7 @@ class Game
 	/*Moves the char left or right*/
 	void movePiece(Piece& piece, const char& ch, int& x, int& y);
 
-	double timeLeft(Timer& timer, const int level) const;
+	double timeLeft(Timer& timer) const;
 
 	/*Sets the piece as '$' if it can not shift down any further*/
 	void pieceToRow(Piece& piece);
@@ -46,6 +51,14 @@ class Game
 	bool rotatePiece(Piece& piece, const int& x, const int& y);
 
 	bool destroyRow();
+
+	int rows_left();
+
+	void reset();
+
+	bool foam_bomb(const int& x, const int& y, int x_filledL = 2, int x_filledR = 2, int y_filledU = 2, int y_filledD = 2);
+
+	//char get_level() const;
 };
 
 #endif // GAME_INCLUDED

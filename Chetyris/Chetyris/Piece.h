@@ -19,6 +19,7 @@ public:
 	int increment_orientation();
 	int decrement_orientation();
 	int get_orientation() const;
+	PieceType get_piece_type() const;
 
 private:
 	PieceType m_piece_type;

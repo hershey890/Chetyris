@@ -20,6 +20,10 @@ int Piece::get_orientation() const {
 	return m_orientation;
 }
 
+PieceType Piece::get_piece_type() const {
+	return m_piece_type;
+}
+
 char* Piece::get_piece()
 {
 	//PieceType piece = m_piece_type;
