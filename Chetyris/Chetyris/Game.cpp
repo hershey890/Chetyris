@@ -95,7 +95,6 @@ void Game::displayStatus() {
 	m_screen.gotoXY(ROWS_LEFT_X + 17, ROWS_LEFT_Y);
 	m_screen.printString(std::to_string(rows_left()));
 	m_screen.gotoXY(SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1);
-	//m_screen.printChar(rows_left() + 48); 
 
 	/* LEVEL */
 	m_screen.gotoXY(LEVEL_X, LEVEL_Y);	
@@ -118,7 +117,7 @@ bool Game::playOneLevel() {
 		displayNextPiece();
 
 		/* TAKES IN KEYSTROKE */
-		char key_press;
+		char key_press= '_';
 		getCharIfAny(key_press);
 
 		/* CALCULATES SCORE */
@@ -145,8 +144,36 @@ bool Game::playOneLevel() {
 			break;
 		}
 
+		/* RESTARTS THE TIMER BASED ON T = maximum(1000-(100*(L-1)), 100) */
+		if (timer.elapsed() >= timeLeft(timer)) {
+			erasePiece(m_current_piece, x_pos, y_pos);
+			y_pos++;
+			printPiece(m_current_piece, x_pos, y_pos);
+			timer.start();
+		}
+		/*else if (!canMove(DOWN, m_current_piece) && timer.elapsed() < timeLeft(timer)) {
+			while ()
+			getCharIfAny(key_press);
+			if (key_press == '4' || key_press == '6') {
+				assert(false);
+				movePiece(m_current_piece, key_press, x_pos, y_pos);
+				
+			}
+		}*/
 		/* CREATES A NEW PIECE IF THE CURRENT PIECE CAN'T MOVE DOWN ANY FURTHER */
-		if (!canMove(DOWN, m_current_piece)) {
+		else if (!canMove(DOWN, m_current_piece)) {
+			while (timer.elapsed() < timeLeft(timer)) {
+				getCharIfAny(key_press);
+				if (key_press == '2')
+					break;
+				if (key_press == '4' || key_press == '6') {
+					movePiece(m_current_piece, key_press, x_pos, y_pos);
+					key_press = 'x';
+				}
+			}
+
+			timer.start();
+			pieceToRow(m_current_piece);
 			m_current_piece = m_next_piece;
 			Piece new_piece(chooseRandomPieceType());	//selects a new piece randomly 
 			m_next_piece = new_piece;
@@ -154,44 +181,36 @@ bool Game::playOneLevel() {
 			x_pos = 3;
 			y_pos = 0;
 			key_press = 'x';
-			//displayStatus();
-			//continue;
 		}
-
-		/* RESTARTS THE TIMER BASED ON T = maximum(1000-(100*(L-1)), 100) */
-		else if (timer.elapsed() >= timeLeft(timer)) {
-			erasePiece(m_current_piece, x_pos, y_pos);
-			y_pos++;
-			printPiece(m_current_piece, x_pos, y_pos);
-			timer.start();
-			//displayStatus();
-			//continue;
-		}
-
 		else {
 			/* PROCESSES KEYSTROKE */
 			if (key_press == 'q' || key_press == 'Q' || !game_ended()) { //quit
 				return false;
 			}
-			else if (key_press == '4' || key_press == '6' || key_press == '2') {		//move the char left, right or down
-				if (m_current_piece.get_piece_type() == PIECE_CRAZY) {
-					(key_press == '4') ? key_press = '6' :
-						(key_press == '6') ? key_press = '4' :
-						(key_press == '2');
-				}
 
+			else if (key_press == '4' || key_press == '6' || key_press == '2') {		//move the char left, right or down
+				if  (m_current_piece.get_piece_type() == PIECE_CRAZY) {
+					(key_press == '4') ? key_press = '6' :
+					(key_press == '6') ? key_press = '4' :
+					(key_press == '2');
+				}
 				movePiece(m_current_piece, key_press, x_pos, y_pos); //move char LR, also modifies x_pos
 				if (key_press == '2')	// restarts the timer if the piece is moved down
 					timer.start();
 				key_press = 'x'; //changes the key_press to a random char that does nothing
 			}
+
 			else if (key_press == ' ') {	//sends the piece to the bottom -- spacebar
-				movePiece(m_current_piece, key_press, x_pos, y_pos);
+				while (canMove(DOWN, m_current_piece)) {
+					movePiece(m_current_piece, key_press, x_pos, y_pos);
+				}
 			}
+
 			else if (key_press == '8') {	//up key
 				rotatePiece(m_current_piece, x_pos, y_pos);
 				key_press = 'x';
 			}
+
 			displayStatus();
 		}
 	}
@@ -331,7 +350,7 @@ bool Game::canMove(const m_direction& dir, Piece& piece) {
 						}
 
 						/* REGULAR PIECE - converts the piece from '#' to '$' */ 
-						pieceToRow(piece);
+						//pieceToRow(piece);
 					}
 
 					return false;
