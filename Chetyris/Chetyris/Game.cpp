@@ -172,15 +172,7 @@ bool Game::playOneLevel() {
 				}
 			}
 
-			timer.start();
-			pieceToRow(m_current_piece);
-			m_current_piece = m_next_piece;
-			Piece new_piece(chooseRandomPieceType());	//selects a new piece randomly 
-			m_next_piece = new_piece;
-			timer.start();
-			x_pos = 3;
-			y_pos = 0;
-			key_press = 'x';
+			nextPiece(timer, x_pos, y_pos, key_press);
 		}
 		else {
 			/* PROCESSES KEYSTROKE */
@@ -204,6 +196,8 @@ bool Game::playOneLevel() {
 				while (canMove(DOWN, m_current_piece)) {
 					movePiece(m_current_piece, key_press, x_pos, y_pos);
 				}
+				nextPiece(timer, x_pos, y_pos, key_press);
+				continue;
 			}
 
 			else if (key_press == '8') {	//up key
@@ -217,6 +211,18 @@ bool Game::playOneLevel() {
 
 	reset();
     return true;
+}
+
+void Game::nextPiece(Timer& timer, int& x_pos, int& y_pos, char& key_press) {
+	timer.start();
+	pieceToRow(m_current_piece);
+	m_current_piece = m_next_piece;
+	Piece new_piece(chooseRandomPieceType());	//selects a new piece randomly 
+	m_next_piece = new_piece;
+	timer.start();
+	x_pos = 3;
+	y_pos = 0;
+	key_press = 'x';
 }
 
 
